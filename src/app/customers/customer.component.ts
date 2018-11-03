@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { Customer } from './customer';
 
@@ -12,14 +12,16 @@ export class CustomerComponent implements OnInit {
   customerForm: FormGroup;
   customer = new Customer();
 
-  constructor() { }
+  constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
-    this.customerForm = new FormGroup({ //creates root form group
-      firstName: new FormControl(),
-      lastName: new FormControl(),
-      email: new FormControl(),
-      sendCatalog: new FormControl(true)
+    this.customerForm = this.fb.group({ //creates root form group
+      firstName: ['', [Validators.required, Validators.minLength(3)]],
+      lastName: ['', [Validators.required, Validators.maxLength(50)]], //{value: 'n/a', disabled: true} can be used to set the properties of the form control
+      email: ['', [Validators.required, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9.-]+')]],
+      phone: '',
+      notification: 'email',
+      sendCatalog: true      
     });  
   }
 
@@ -42,5 +44,15 @@ export class CustomerComponent implements OnInit {
   save() {
     console.log(this.customerForm);
     console.log('Saved: ' + JSON.stringify(this.customerForm));
+  }
+
+  setNotification(notifyVia: string): void {
+    const phoneContol = this.customerForm.get('phone');
+    if(notifyVia === 'text') {
+      phoneContol.setValidators(Validators.required);
+    } else {
+      phoneContol.clearValidators();
+    }
+    phoneContol.updateValueAndValidity();
   }
 }
