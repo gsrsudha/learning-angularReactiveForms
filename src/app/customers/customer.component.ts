@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
 
 import { Customer } from './customer';
 
@@ -20,7 +20,23 @@ export class CustomerComponent implements OnInit {
       lastName: new FormControl(),
       email: new FormControl(),
       sendCatalog: new FormControl(true)
-    });
+    });  
+  }
+
+  populateTestData(): void {
+    /* // setValue demo
+    this.customerForm.setValue({ //setValue == requires to set all the values of the form group
+      firstName: 'Jack',
+      lastName: 'Harkness',
+      email: 'jack@torchwood.com',
+      sendCatalog: false
+    })
+    */
+    this.customerForm.patchValue({ //patchValue == can only set required values of the form group
+      firstName: 'Jack',
+      lastName: 'Harkness',
+      sendCatalog: false,
+    })
   }
 
   save() {
