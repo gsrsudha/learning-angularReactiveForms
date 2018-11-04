@@ -1,8 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 
 import { Customer } from './customer';
 
+/*to pass parameters to a custom validator function the custom validator function is wrapped as return function like below
+  as the custom validator can only take one parameter i.e., AbstractControl */
+function ratingRange(min: number, max: number): ValidatorFn { 
+  return (c: AbstractControl): {[key: string]: boolean} | null{
+          if(c.value != undefined && (isNaN(c.value) || c.value < min || c.value > max)) {
+            return {'range': true};
+          };
+    return null;
+  };
+}
 @Component({
   selector: 'app-customer',
   templateUrl: './customer.component.html',
@@ -21,6 +31,7 @@ export class CustomerComponent implements OnInit {
       email: ['', [Validators.required, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9.-]+')]],
       phone: '',
       notification: 'email',
+      rating: ['', ratingRange(1, 5)],
       sendCatalog: true      
     });  
   }
