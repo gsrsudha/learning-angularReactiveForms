@@ -6,13 +6,26 @@ import { Customer } from './customer';
 /*to pass parameters to a custom validator function the custom validator function is wrapped as return function like below
   as the custom validator can only take one parameter i.e., AbstractControl */
 function ratingRange(min: number, max: number): ValidatorFn { 
-  return (c: AbstractControl): {[key: string]: boolean} | null{
+  return (c: AbstractControl): { [key: string]: boolean} | null => {
           if(c.value != undefined && (isNaN(c.value) || c.value < min || c.value > max)) {
             return {'range': true};
-          };
+          }
     return null;
   };
 }
+
+function emailMatcher(c: AbstractControl): { [key: string]: boolean} | null {
+    let emailControl = c.get('email');
+    let confirmEmailControl = c.get('confirmEmail');
+    if(emailControl.pristine || confirmEmailControl.pristine) { //lets not validate until user has typed anything i.e., not until touched property is true
+        return null;
+    }
+    if(emailControl.value === confirmEmailControl.value) {
+        return null;
+    }
+    return {'match' : true};
+}
+
 @Component({
   selector: 'app-customer',
   templateUrl: './customer.component.html',
@@ -28,7 +41,10 @@ export class CustomerComponent implements OnInit {
     this.customerForm = this.fb.group({ //creates root form group
       firstName: ['', [Validators.required, Validators.minLength(3)]],
       lastName: ['', [Validators.required, Validators.maxLength(50)]], //{value: 'n/a', disabled: true} can be used to set the properties of the form control
-      email: ['', [Validators.required, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9.-]+')]],
+      emailGroup: this.fb.group({
+        email: ['', [Validators.required, Validators.pattern('[a-z0-9._%+-]+@[a-z0-9.-]+')]],
+        confirmEmail: ['', Validators.required],
+      }, {validator: emailMatcher}),      
       phone: '',
       notification: 'email',
       rating: ['', ratingRange(1, 5)],
